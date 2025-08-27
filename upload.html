@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload Course Materials</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 2rem;
+      background: #f0f4f8;
+      color: #182848;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    input, button {
+      padding: 0.75rem;
+      font-size: 1rem;
+    }
+    button {
+      background: #182848;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #394867;
+    }
+    #errorSection, #successSection {
+      max-width: 400px;
+      margin: 2rem auto;
+      font-weight: 600;
+      text-align: center;
+      border-radius: 8px;
+      padding: 1rem;
+      display: none;
+    }
+    #errorSection {
+      color: red;
+      background: #fee2e2;
+      border: 1px solid red;
+    }
+    #successSection {
+      color: green;
+      background: #e2f7e2;
+      border: 1px solid green;
+    }
+  </style>
+</head>
+<body>
+  <h2>Upload Course Materials</h2>
+
+  <div id="uploadSection" style="display:none;">
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="text" name="title" placeholder="Course Title" required />
+      <input type="file" name="file" required />
+      <button type="submit">Upload</button>
+    </form>
+  </div>
+
+  <div id="errorSection"></div>
+  <div id="successSection"></div>
+
+  <script>
+    window.onload = function () {
+      const userJSON = localStorage.getItem('currentUser');
+      const uploadSection = document.getElementById('uploadSection');
+      const errorSection = document.getElementById('errorSection');
+
+      if (!userJSON) {
+        errorSection.style.display = 'block';
+        errorSection.textContent = 'You must be logged in to upload files.';
+        return;
+      }
+
+      const user = JSON.parse(userJSON);
+
+      if (user.role === 'lecturer') {
+        uploadSection.style.display = 'block';
+        errorSection.style.display = 'none';
+      } else {
+        uploadSection.style.display = 'none';
+        errorSection.style.display = 'block';
+        errorSection.textContent = 'You do not have permission to upload files.';
+      }
+    };
+
+    const uploadForm = document.getElementById('uploadForm');
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(uploadForm);
+      const errorSection = document.getElementById('errorSection');
+      const successSection = document.getElementById('successSection');
+
+      try {
+        const response = await fetch('http://localhost:3000/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          successSection.style.display = 'block';
+          errorSection.style.display = 'none';
+          successSection.textContent = result.message || 'File uploaded successfully!';
+        } else {
+          successSection.style.display = 'none';
+          errorSection.style.display = 'block';
+          errorSection.textContent = result.error || 'Something went wrong.';
+        }
+      } catch (err) {
+        successSection.style.display = 'none';
+        errorSection.style.display = 'block';
+        errorSection.textContent = 'Server error. Please try again later.';
+      }
+    });
+  </script>
+</body>
+</html>

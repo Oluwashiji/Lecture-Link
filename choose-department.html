@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Choose Department – Lemon Chase</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6fc; margin:0; }
+    header { background:#182848; color:#fff; padding:1rem; text-align:center;}
+    .container { padding:2rem; max-width:400px; margin:2rem auto; background:#fff; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+    select, button { width:100%; padding:0.8rem; font-size:1rem; margin:1rem 0; border-radius:6px; border:1px solid #ccc;}
+    button { background:#182848; color:#fff; border:none; cursor:pointer;}
+    button:hover { background:#39548a;}
+  </style>
+</head>
+<body>
+  <header><h1 id="welcomeHeader">Welcome to Lemon Chase</h1></header>
+  <div class="container">
+    <h2>Select Your Department</h2>
+    <select id="dept">
+      <option value="">-- Choose Department --</option>
+      <option value="ComputerScience">Computer Science</option>
+      <option value="SoftwareEngineering">Software Engineering</option>
+      <option value="InformationSystems">Information Systems</option>
+      <option value="ComputerScienceEducation">Computer Science Education</option>
+      <option value="CyberSecurity">Cyber Security</option>
+      <!-- Add more as needed -->
+    </select>
+    <button onclick="goLevels()">Continue</button>
+  </div>
+
+  <script>
+    // Change header if logged in user is lecturer
+    window.onload = function() {
+      const currentUserJSON = localStorage.getItem('currentUser');
+      if (!currentUserJSON) return;
+
+      const currentUser = JSON.parse(currentUserJSON);
+      if (currentUser.role === 'lecturer') {
+        const header = document.getElementById('welcomeHeader');
+        header.textContent = `Welcome, ${currentUser.fullName}!`;
+      }
+    };
+
+    function goLevels() {
+      const dept = document.getElementById("dept").value;
+      if (!dept) return alert("Please choose a department.");
+      // pass dept via query string
+      window.location.href = `levels.html?dept=${dept}`;
+    }
+  </script>
+</body>
+</html>

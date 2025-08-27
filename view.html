@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>View Course Content – Lemon Chase</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6fc; margin: 0; }
+    header { background: #182848; color: #fff; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .logout-btn { background: #4b6cb7; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
+    .container { padding: 2rem; max-width: 600px; margin: auto; }
+    h2 { margin-top: 0; }
+    input[type="text"] {
+      width: 100%; padding: 0.5rem; font-size: 1rem; margin-bottom: 1rem; border-radius: 6px; border: 1px solid #ccc;
+    }
+    .results { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .result-item { padding: 0.5rem 0; border-bottom: 1px solid #eee; }
+    .no-results { color: #888; font-style: italic; }
+    button.back-btn {
+      background: #4b6cb7; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="pageTitle">View Course Content</h1>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </header>
+
+  <div class="container">
+    <button class="back-btn" onclick="goBack()">← Back to Levels</button>
+    <h2 id="deptLevelTitle"></h2>
+    <input type="text" id="searchInput" placeholder="Type course name to search..." oninput="searchCourses()" autofocus />
+    <div class="results" id="results"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const deptKey = params.get('dept');
+    const level = params.get('level');
+
+    const deptNames = {
+      ComputerScience: "Computer Science",
+      SoftwareEngineering: "Software Engineering",
+      InformationSystems: "Information Systems"
+    };
+
+    document.getElementById('deptLevelTitle').textContent = `${deptNames[deptKey] || 'Department'} – ${level || ''}`;
+
+    let courses = [];
+
+    // Fetch courses from backend on page load
+    async function fetchCourses() {
+      try {
+        const response = await fetch(`/api/getCourses?dept=${encodeURIComponent(deptKey)}&level=${encodeURIComponent(level)}`);
+        if (!response.ok) throw new Error('Failed to fetch courses');
+        courses = await response.json();
+        displayCourses(courses);
+      } catch (error) {
+        document.getElementById('results').innerHTML = `<p class="no-results">Error loading courses: ${error.message}</p>`;
+      }
+    }
+
+    // Display all courses initially or filtered
+    function displayCourses(courseList) {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+      if (!courseList.length) {
+        resultsDiv.innerHTML = '<p class="no-results">No courses found.</p>';
+        return;
+      }
+      courseList.forEach(course => {
+        const div = document.createElement('div');
+        div.className = 'result-item';
+        div.textContent = course;
+        resultsDiv.appendChild(div);
+      });
+    }
+
+    function searchCourses() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = courses.filter(c => c.toLowerCase().includes(query));
+      displayCourses(filtered);
+    }
+
+    function logout() {
+      window.location.href = 'login.html';
+    }
+
+    function goBack() {
+      window.location.href = `levels.html?dept=${deptKey}`;
+    }
+
+    fetchCourses();
+  </script>
+</body>
+</html>

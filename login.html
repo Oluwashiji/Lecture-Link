@@ -1,0 +1,364 @@
+<!-- login.html -->
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lemon Chase Login & Signup</title>
+  <style>
+    body {
+      background: #e3f2fd;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem 2.5rem;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      width: 320px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #182848;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"] {
+      width: 100%;
+      padding: 0.7rem;
+      margin: 0.6rem 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #182848;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #394867;
+    }
+
+    .toggle-link {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #555;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Hide signup form initially */
+    #signupForm {
+      display: none;
+    }
+
+    /* Error and success messages */
+    .message {
+      margin-top: 0.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .error {
+      color: red;
+    }
+    .success {
+      color: green;
+    }
+
+    /* Role toggle buttons */
+    .role-toggle {
+      display: flex;
+      
+      justify-content: center;
+      margin-bottom: 1rem;
+      gap: 10px;
+    }
+    .role-toggle button {
+      width: auto;
+      padding: 0.4rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid #182848;
+      background: white;
+      color: #182848;
+      cursor: pointer;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .role-toggle button.active,
+    .role-toggle button:hover {
+      background: #182848;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Login Form -->
+    <form id="loginForm" onsubmit="login(event)">
+      <h2>Login to Lemon Chase</h2>
+
+      <div class="role-toggle">
+        <button type="button" id="loginStudentBtn" class="active" onclick="setLoginRole('student')">Student</button>
+        <button type="button" id="loginLecturerBtn" onclick="setLoginRole('lecturer')">Lecturer</button>
+      </div>
+
+      <input type="text" id="loginId" placeholder="Student ID or Email" required />
+      <input type="password" id="loginPassword" placeholder="Password" required />
+      <button type="submit">Login</button>
+      <div id="loginMessage" class="message"></div>
+      <div class="toggle-link" onclick="toggleForms()">Don't have an account? Sign up</div>
+    </form>
+
+    <!-- Signup Form -->
+    <form id="signupForm" onsubmit="signup(event)">
+      <h2>Sign Up for Lemon Chase</h2>
+
+      <div class="role-toggle">
+        <button type="button" id="signupStudentBtn" class="active" onclick="setSignupRole('student')">Register as Student</button>
+        <button type="button" id="signupLecturerBtn" onclick="setSignupRole('lecturer')">Register as Lecturer</button>
+      </div>
+
+      <input type="text" id="fullName" placeholder="Full Name (Surname first)" required />
+      <input type="text" id="matricNo" placeholder="Matric No (Student ID)" required />
+      <input type="password" id="signupPassword" placeholder="Create a password" required />
+      <input type="email" id="email" placeholder="Email (optional)" />
+      <button type="submit">Register</button>
+      <div id="signupMessage" class="message"></div>
+      <div class="toggle-link" onclick="toggleForms()">Already have an account? Login</div>
+    </form>
+  </div>
+
+  <script>
+    let loginRole = 'student';   // 'student' or 'lecturer'
+    let signupRole = 'student';  // 'student' or 'lecturer'
+
+    function setLoginRole(role) {
+      loginRole = role;
+      // Update button active states
+      document.getElementById('loginStudentBtn').classList.toggle('active', role === 'student');
+      document.getElementById('loginLecturerBtn').classList.toggle('active', role === 'lecturer');
+
+      const loginIdInput = document.getElementById('loginId');
+      loginIdInput.value = '';
+      loginIdInput.required = true;
+
+      if (role === 'student') {
+        loginIdInput.placeholder = "Student ID or Email";
+      } else {
+        loginIdInput.placeholder = "Lecturer's Full Name";
+      }
+    }
+
+    function setSignupRole(role) {
+      signupRole = role;
+      // Update button active states
+      document.getElementById('signupStudentBtn').classList.toggle('active', role === 'student');
+      document.getElementById('signupLecturerBtn').classList.toggle('active', role === 'lecturer');
+
+      const matricInput = document.getElementById('matricNo');
+      matricInput.value = '';
+      matricInput.required = (role === 'student');
+
+      if (role === 'student') {
+        matricInput.placeholder = "Matric No (Student ID)";
+        matricInput.style.display = "block";
+      } else {
+        // For lecturer, no matricNo input
+        matricInput.style.display = "none";
+      }
+    }
+
+    function toggleForms() {
+      const loginForm = document.getElementById('loginForm');
+      const signupForm = document.getElementById('signupForm');
+      const loginMsg = document.getElementById('loginMessage');
+      const signupMsg = document.getElementById('signupMessage');
+
+      loginMsg.textContent = '';
+      signupMsg.textContent = '';
+
+      if (loginForm.style.display === 'none' || loginForm.style.display === '') {
+        loginForm.style.display = 'block';
+        signupForm.style.display = 'none';
+
+        // Reset role toggle to default on show
+        setLoginRole('student');
+      } else {
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'block';
+
+        setSignupRole('student');
+      }
+    }
+
+    // Helper to get users from localStorage
+    function getUsers() {
+      const users = localStorage.getItem('users');
+      return users ? JSON.parse(users) : [];
+    }
+    // Helper to save users to localStorage
+    function saveUsers(users) {
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    function login(event) {
+      event.preventDefault();
+      const loginIdRaw = document.getElementById('loginId').value.trim();
+      const loginPassword = document.getElementById('loginPassword').value;
+
+      const users = getUsers();
+
+      let user;
+      if (loginRole === 'lecturer') {
+        // Match lecturer by fullName (case-insensitive)
+        user = users.find(u => u.role === 'lecturer' && u.fullName.toLowerCase() === loginIdRaw.toLowerCase());
+      } else {
+        // Student login by matricNo or email
+        user = users.find(u =>
+          u.role === 'student' &&
+          (u.matricNo === loginIdRaw || (u.email && u.email.toLowerCase() === loginIdRaw.toLowerCase()))
+        );
+      }
+
+      const loginMessage = document.getElementById('loginMessage');
+      loginMessage.textContent = '';
+      loginMessage.className = 'message';
+
+      if (!user) {
+        loginMessage.textContent = 'Wrong username.';
+        loginMessage.classList.add('error');
+        return;
+      }
+      if (user.password !== loginPassword) {
+        loginMessage.textContent = 'Invalid password.';
+        loginMessage.classList.add('error');
+        return;
+      }
+
+      // Save current logged-in user info in localStorage
+      localStorage.setItem('currentUser', JSON.stringify(user));
+
+      // Successful login
+      loginMessage.textContent = 'Login successful! Redirecting...';
+      loginMessage.classList.remove('error');
+      loginMessage.classList.add('success');
+
+      // Redirect after short delay
+      setTimeout(() => {
+        window.location.href = "choose-department.html";
+      }, 1200);
+    }
+
+    function signup(event) {
+      event.preventDefault();
+
+      const fullName = document.getElementById('fullName').value.trim();
+      const matricNoInput = document.getElementById('matricNo');
+      const matricNo = matricNoInput.style.display !== 'none' ? matricNoInput.value.trim() : '';
+      const password = document.getElementById('signupPassword').value;
+      const email = document.getElementById('email').value.trim();
+
+      const signupMessage = document.getElementById('signupMessage');
+      signupMessage.textContent = '';
+      signupMessage.className = 'message';
+
+      // Validation
+      if (!fullName || !password) {
+        signupMessage.textContent = 'Please fill in all required fields.';
+        signupMessage.classList.add('error');
+        return;
+      }
+      if (signupRole === 'student' && !matricNo) {
+        signupMessage.textContent = 'Please provide your Matric No (Student ID).';
+        signupMessage.classList.add('error');
+        return;
+      }
+
+      let users = getUsers();
+
+      // Check duplicates
+      if (signupRole === 'student') {
+        if (users.some(u => u.matricNo === matricNo)) {
+          signupMessage.textContent = 'Matric No (Student ID) already registered.';
+          signupMessage.classList.add('error');
+          return;
+        }
+      }
+      if (email) {
+        if (users.some(u => u.email && u.email.toLowerCase() === email.toLowerCase())) {
+          signupMessage.textContent = 'Email already registered.';
+          signupMessage.classList.add('error');
+          return;
+        }
+      }
+      if (signupRole === 'lecturer') {
+        if (users.some(u => u.role === 'lecturer' && u.fullName.toLowerCase() === fullName.toLowerCase())) {
+          signupMessage.textContent = 'Lecturer name already registered.';
+          signupMessage.classList.add('error');
+          return;
+        }
+      }
+
+      // Save new user
+      const newUser = {
+        fullName,
+        password,
+        email,
+        role: signupRole
+      };
+      if (signupRole === 'student') newUser.matricNo = matricNo;
+
+      users.push(newUser);
+      saveUsers(users);
+
+      signupMessage.textContent = 'Registration successful! Please login.';
+      signupMessage.classList.remove('error');
+      signupMessage.classList.add('success');
+
+      // Reset form
+      event.target.reset();
+
+      // Switch to login form after a short delay so user can see success message
+      setTimeout(() => {
+        toggleForms();
+        signupMessage.textContent = '';
+      }, 1800);
+    }
+
+    // Initialize form role states on page load
+    window.onload = () => {
+      setLoginRole('student');
+      setSignupRole('student');
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'block';
+    };
+  </script>
+
+</body>
+</html>

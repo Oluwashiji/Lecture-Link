@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Levels – Lemon Chase</title>
+  <style>
+    body { margin:0; font-family:'Segoe UI',sans-serif; background:#f4f6fc; }
+    header { background:#182848; color:#fff; padding:1rem; display:flex; justify-content:space-between; align-items:center;}
+    .back-btn, .logout-btn { background:#4b6cb7; color:#fff; border:none; padding:0.5rem 1rem; border-radius:6px; cursor:pointer;}
+    .container { padding:2rem; }
+    .levels-list { list-style:none; padding:0; max-width:400px; margin:auto;}
+    .levels-list li { background:#fff; padding:1rem; margin:0.5rem 0; border-radius:8px; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+    .options { display:none; margin-top:0.5rem; }
+    .options button { margin-right:0.5rem; padding:0.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="deptName">Department</h1>
+    <div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <ul class="levels-list" id="levelsList"></ul>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const deptKey = params.get("dept");
+    const deptNames = {
+      ComputerScience: "Computer Science",
+      SoftwareEngineering: "Software Engineering",
+      InformationSystems: "Information Systems" ,
+      ComputerScienceEducation: "Computer Science Education",
+      CyberSecurity: "Cyber Security"
+    };
+    document.getElementById("deptName").textContent = deptNames[deptKey] || "Department";
+
+    const levels = ["100 Level", "200 Level", "300 Level", "400 Level"]; // adjust if needed
+
+    const list = document.getElementById("levelsList");
+    levels.forEach(lvl => {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${lvl}</strong>
+        <div class="options">
+          <button onclick="view('${lvl}')">View Course Content</button>
+          <button onclick="upload('${lvl}')">Upload Course Content</button>
+        </div>`;
+      li.onclick = () => {
+        const opt = li.querySelector(".options");
+        opt.style.display = opt.style.display === "block" ? "none" : "block";
+      };
+      list.appendChild(li);
+    });
+
+    function view(level) {
+      window.location.href = `view.html?dept=${deptKey}&level=${encodeURIComponent(level)}`;
+    }
+    function upload(level) {
+      window.location.href = `upload.html?dept=${deptKey}&level=${encodeURIComponent(level)}`;
+    }
+    function logout() {
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
+
