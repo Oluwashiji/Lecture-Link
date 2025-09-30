@@ -1,64 +1,50 @@
 /* General reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* Body styling */
-body {
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
-  background: #f4f4f9;
-  color: #333;
-  padding: 10px;
-}
-
-/* Container for centered content */
-.container {
-  max-width: 900px;
-  margin: auto;
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-/* Buttons */
-button {
-  display: inline-block;
-  padding: 10px 20px;
-  margin: 8px 0;
-  font-size: 1rem;
-  border: none;
-  border-radius: 6px;
-  background: #007bff;
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-button:hover {
-  background: #0056b3;
-}
-
-/* Forms */
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0 16px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
 /* Responsive layout */
 @media (max-width: 768px) {
+  body {
+    font-size: 14px;
+    padding: 5px;
+  }
+
   .container {
-    padding: 15px;
+    padding: 12px;
   }
 
   button {
     width: 100%;
+    font-size: 0.9rem;
+    padding: 12px;
+  }
+
+  input, select {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+
+  h1, h2, h3 {
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .levels-list li {
+    font-size: 0.95rem;
+    padding: 0.8rem;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  header h1 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+
+  .logout-btn, .back-btn {
+    width: 100%;
+    margin-top: 5px;
   }
 }
+
+
