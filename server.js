@@ -1,11 +1,11 @@
-   const express = require('express');
+const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Use Render’s port
+const PORT = process.env.PORT || 3000; // Render provides PORT automatically
 
 app.use(cors());
 app.use(express.json());
@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
     cb(null, './uploads');
   },
   filename: (req, file, cb) => {
-    const uniqueName = Date.now() + '-' + file.originalname;
+    const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
     cb(null, uniqueName);
   }
 });
@@ -62,13 +62,14 @@ app.post('/upload', upload.single('file'), (req, res) => {
     title,
     dept,
     level,
-    filename: req.file.filename
+    filename: req.file.filename,
+    url: `/uploads/${req.file.filename}`
   };
   metadata.push(newEntry);
 
   fs.writeFileSync(metaPath, JSON.stringify(metadata, null, 2));
 
-  res.json({ message: 'Upload successful', filename: req.file.filename });
+  res.json({ message: 'Upload successful', file: newEntry });
 });
 
 // Get files
@@ -85,8 +86,12 @@ app.get('/files', (req, res) => {
   res.json(metadata);
 });
 
+// 404 fallback
+app.use((req, res) => {
+  res.status(404).send('Page not found');
+});
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
-
 
