@@ -1,137 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Upload Course Materials</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 2rem;
-      background: #f0f4f8;
-      color: #182848;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-    form {
-      max-width: 400px;
-      margin: 0 auto;
-      background: white;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    input, button {
-      padding: 0.75rem;
-      font-size: 1rem;
-    }
-    button {
-      background: #182848;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button:hover {
-      background: #394867;
-    }
-    #errorSection, #successSection {
-      max-width: 400px;
-      margin: 2rem auto;
-      font-weight: 600;
-      text-align: center;
-      border-radius: 8px;
-      padding: 1rem;
-      display: none;
-    }
-    #errorSection {
-      color: red;
-      background: #fee2e2;
-      border: 1px solid red;
-    }
-    #successSection {
-      color: green;
-      background: #e2f7e2;
-      border: 1px solid green;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Course Materials</title>
+<style>
+/* General body with repeated Lecture Link background */
+body { 
+  font-family: 'Segoe UI', sans-serif; 
+  margin: 0;
+  padding: 2rem; 
+  color: #182848; 
+  min-height: 100vh;
+  position: relative;
+  z-index: 0;
+  background: #f0f4f8;
+  overflow-x: hidden;
+}
+body::before {
+  content: "Lecture Link Lecture Link Lecture Link Lecture Link ";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  font-size: 4rem;
+  font-weight: 700;
+  color: rgba(24, 40, 72, 0.06); /* watermark effect */
+  line-height: 6rem;
+  white-space: pre;
+  background-repeat: repeat;
+  z-index: -1;
+  pointer-events: none;
+}
+
+header { 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:center; 
+  margin-bottom:1.5rem; 
+  background:#182848; 
+  color:#fff; 
+  padding:0.75rem 1.25rem; 
+  border-radius:10px; 
+  box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+.logout-btn { 
+  background:#4b6cb7; 
+  color:#fff; 
+  border:none; 
+  padding:0.5rem 1rem; 
+  border-radius:6px; 
+  cursor:pointer; 
+  font-weight:600;
+}
+.logout-btn:hover { background:#6a89cc; }
+
+form { 
+  max-width:400px; 
+  margin:0 auto; 
+  background:white; 
+  padding:1.5rem; 
+  border-radius:12px; 
+  display:flex; 
+  flex-direction:column; 
+  gap:1rem; 
+  box-shadow:0 5px 20px rgba(0,0,0,0.15);
+}
+input, select, button { 
+  padding:0.75rem; 
+  font-size:1rem; 
+}
+button { 
+  background:#182848; 
+  color:white; 
+  border:none; 
+  border-radius:6px; 
+  cursor:pointer; 
+  font-weight:600; 
+}
+button:hover { background:#394867; }
+
+#successSection, #errorSection { 
+  max-width:400px; 
+  margin:2rem auto; 
+  padding:1rem; 
+  border-radius:8px; 
+  font-weight:600; 
+  text-align:center; 
+  display:none; 
+}
+#successSection { 
+  color:green; 
+  background:#e2f7e2; 
+  border:1px solid green; 
+}
+#errorSection { 
+  color:red; 
+  background:#fee2e2; 
+  border:1px solid red; 
+}
+#restrictedMessage { 
+  max-width:400px; 
+  margin:2rem auto; 
+  padding:1rem; 
+  border-radius:8px; 
+  background:#fee2e2; 
+  color:red; 
+  font-weight:600; 
+  text-align:center; 
+  display:none; 
+}
+</style>
 </head>
 <body>
+
+<header>
   <h2>Upload Course Materials</h2>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</header>
 
-  <div id="uploadSection" style="display:none;">
-    <form id="uploadForm" enctype="multipart/form-data">
-      <input type="text" name="title" placeholder="Course Title" required />
-      <input type="file" name="file" required />
-      <button type="submit">Upload</button>
-    </form>
-  </div>
+<div id="restrictedMessage">You do not have permission to upload. Only lecturers can upload materials.</div>
 
-  <div id="errorSection"></div>
-  <div id="successSection"></div>
+<form id="uploadForm" enctype="multipart/form-data">
+  <input type="text" name="title" placeholder="Course Title" required>
+  <select name="dept" required>
+    <option value="">Select Department</option>
+    <option value="Computer Science">Computer Science</option>
+    <option value="Software Engineering">Software Engineering</option>
+    <option value="Information Systems">Information Systems</option>
+    <option value="Computer Science Education">Computer Science Education</option>
+    <option value="Cyber Security">Cyber Security</option>
+  </select>
+  <select name="level" required>
+    <option value="">Select Level</option>
+    <option value="100 Level">100 Level</option>
+    <option value="200 Level">200 Level</option>
+    <option value="300 Level">300 Level</option>
+    <option value="400 Level">400 Level</option>
+  </select>
+  <input type="file" name="file" accept=".pdf,.docx" required>
+  <button type="submit">Upload</button>
+</form>
 
-  <script>
-    window.onload = function () {
-      const userJSON = localStorage.getItem('currentUser');
-      const uploadSection = document.getElementById('uploadSection');
-      const errorSection = document.getElementById('errorSection');
+<div id="successSection"></div>
+<div id="errorSection"></div>
 
-      if (!userJSON) {
-        errorSection.style.display = 'block';
-        errorSection.textContent = 'You must be logged in to upload files.';
-        return;
-      }
+<script>
+const uploadForm = document.getElementById('uploadForm');
+const successSection = document.getElementById('successSection');
+const errorSection = document.getElementById('errorSection');
+const restrictedMessage = document.getElementById('restrictedMessage');
 
-      const user = JSON.parse(userJSON);
+// ✅ Check login status
+const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+if (!currentUser) {
+  window.location.href = "login.html";
+}
 
-      if (user.role === 'lecturer') {
-        uploadSection.style.display = 'block';
-        errorSection.style.display = 'none';
-      } else {
-        uploadSection.style.display = 'none';
-        errorSection.style.display = 'block';
-        errorSection.textContent = 'You do not have permission to upload files.';
-      }
-    };
+// ✅ Restrict access if not lecturer
+if (!currentUser || currentUser.role !== 'lecturer') {
+  uploadForm.style.display = 'none';
+  restrictedMessage.style.display = 'block';
+}
 
-    const uploadForm = document.getElementById('uploadForm');
-    uploadForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
+// ✅ Handle logout
+function logout() {
+  localStorage.removeItem('currentUser');
+  window.location.href = "login.html";
+}
 
-      const formData = new FormData(uploadForm);
-      const errorSection = document.getElementById('errorSection');
-      const successSection = document.getElementById('successSection');
+// ✅ Handle upload
+uploadForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(uploadForm);
 
-      try {
-        const response = await fetch('http://localhost:3000/upload', {
-          method: 'POST',
-          body: formData
-        });
+  formData.append('user', JSON.stringify(currentUser));
 
-        const result = await response.json();
+  try {
+    const res = await fetch('http://localhost:3000/upload', { method:'POST', body:formData });
+    const data = await res.json();
 
-        if (response.ok) {
-          successSection.style.display = 'block';
-          errorSection.style.display = 'none';
-          successSection.textContent = result.message || 'File uploaded successfully!';
-        } else {
-          successSection.style.display = 'none';
-          errorSection.style.display = 'block';
-          errorSection.textContent = result.error || 'Something went wrong.';
-        }
-      } catch (err) {
-        successSection.style.display = 'none';
-        errorSection.style.display = 'block';
-        errorSection.textContent = 'Server error. Please try again later.';
-      }
-    });
-  </script>
+    if(res.ok){
+      successSection.style.display='block';
+      errorSection.style.display='none';
+      successSection.textContent = 'Upload successful! Go to view page to see the file.';
+      uploadForm.reset();
+    } else {
+      throw new Error(data.error || 'Upload failed');
+    }
+  } catch(err){
+    successSection.style.display='none';
+    errorSection.style.display='block';
+    errorSection.textContent = err.message;
+  }
+});
+</script>
 </body>
 </html>
+
