@@ -1,33 +1,58 @@
 <!-- index.html -->
  <!DOCTYPE html>
 <html lang="en">
-<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lemon Chase Login & Signup</title>
+  <title>Lecture Link Login & Signup</title>
   <style>
     body {
-      background: #e3f2fd;
+      margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      margin: 0;
+      overflow: hidden;
+      color: white;
+    }
+
+    /* Background video */
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      filter: brightness(0.6);
+    }
+
+    /* Fallback background if video doesn’t load */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #182848 url('fallback.jpg') no-repeat center center/cover;
+      z-index: -3;
     }
 
     .container {
-      background: white;
+      background: rgba(0, 0, 0, 0.65);
       padding: 2rem 2.5rem;
       border-radius: 10px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.6);
       width: 320px;
     }
 
     h2 {
       text-align: center;
       margin-bottom: 1.5rem;
-      color: #182848;
+      color: #fff;
+      min-height: 1.5em; /* keeps space while typing */
     }
 
     input[type="text"],
@@ -36,7 +61,7 @@
       width: 100%;
       padding: 0.7rem;
       margin: 0.6rem 0;
-      border: 1px solid #ccc;
+      border: none;
       border-radius: 6px;
       box-sizing: border-box;
     }
@@ -44,7 +69,7 @@
     button {
       width: 100%;
       padding: 0.75rem;
-      background: #182848;
+      background: #007bff;
       color: white;
       border: none;
       border-radius: 6px;
@@ -56,14 +81,14 @@
     }
 
     button:hover {
-      background: #394867;
+      background: #0056b3;
     }
 
     .toggle-link {
       margin-top: 1rem;
       text-align: center;
       font-size: 0.9rem;
-      color: #555;
+      color: #ddd;
       cursor: pointer;
       user-select: none;
     }
@@ -83,16 +108,15 @@
       font-size: 0.9rem;
     }
     .error {
-      color: red;
+      color: #ff6b6b;
     }
     .success {
-      color: green;
+      color: #00e676;
     }
 
     /* Role toggle buttons */
     .role-toggle {
       display: flex;
-      
       justify-content: center;
       margin-bottom: 1rem;
       gap: 10px;
@@ -103,25 +127,31 @@
       font-size: 0.9rem;
       font-weight: 600;
       border-radius: 6px;
-      border: 1px solid #182848;
+      border: 1px solid #007bff;
       background: white;
-      color: #182848;
+      color: #007bff;
       cursor: pointer;
       transition: background 0.3s ease, color 0.3s ease;
     }
     .role-toggle button.active,
     .role-toggle button:hover {
-      background: #182848;
+      background: #007bff;
       color: white;
     }
   </style>
 </head>
 <body>
 
+  <!-- Background video -->
+  <video autoplay muted loop id="bgVideo">
+    <source src="assets/background.mp4" type="video/mp4">
+    Your browser does not support HTML5 video.
+  </video>
+
   <div class="container">
     <!-- Login Form -->
     <form id="loginForm" onsubmit="login(event)">
-      <h2>Login to Lemon Chase</h2>
+      <h2 id="welcomeText"></h2>
 
       <div class="role-toggle">
         <button type="button" id="loginStudentBtn" class="active" onclick="setLoginRole('student')">Student</button>
@@ -137,7 +167,7 @@
 
     <!-- Signup Form -->
     <form id="signupForm" onsubmit="signup(event)">
-      <h2>Sign Up for Lemon Chase</h2>
+      <h2>Sign Up for Lecture Link</h2>
 
       <div class="role-toggle">
         <button type="button" id="signupStudentBtn" class="active" onclick="setSignupRole('student')">Register as Student</button>
@@ -160,7 +190,6 @@
 
     function setLoginRole(role) {
       loginRole = role;
-      // Update button active states
       document.getElementById('loginStudentBtn').classList.toggle('active', role === 'student');
       document.getElementById('loginLecturerBtn').classList.toggle('active', role === 'lecturer');
 
@@ -177,7 +206,6 @@
 
     function setSignupRole(role) {
       signupRole = role;
-      // Update button active states
       document.getElementById('signupStudentBtn').classList.toggle('active', role === 'student');
       document.getElementById('signupLecturerBtn').classList.toggle('active', role === 'lecturer');
 
@@ -189,7 +217,6 @@
         matricInput.placeholder = "Matric No (Student ID)";
         matricInput.style.display = "block";
       } else {
-        // For lecturer, no matricNo input
         matricInput.style.display = "none";
       }
     }
@@ -206,23 +233,18 @@
       if (loginForm.style.display === 'none' || loginForm.style.display === '') {
         loginForm.style.display = 'block';
         signupForm.style.display = 'none';
-
-        // Reset role toggle to default on show
         setLoginRole('student');
       } else {
         loginForm.style.display = 'none';
         signupForm.style.display = 'block';
-
         setSignupRole('student');
       }
     }
 
-    // Helper to get users from localStorage
     function getUsers() {
       const users = localStorage.getItem('users');
       return users ? JSON.parse(users) : [];
     }
-    // Helper to save users to localStorage
     function saveUsers(users) {
       localStorage.setItem('users', JSON.stringify(users));
     }
@@ -233,13 +255,11 @@
       const loginPassword = document.getElementById('loginPassword').value;
 
       const users = getUsers();
-
       let user;
+
       if (loginRole === 'lecturer') {
-        // Match lecturer by fullName (case-insensitive)
         user = users.find(u => u.role === 'lecturer' && u.fullName.toLowerCase() === loginIdRaw.toLowerCase());
       } else {
-        // Student login by matricNo or email
         user = users.find(u =>
           u.role === 'student' &&
           (u.matricNo === loginIdRaw || (u.email && u.email.toLowerCase() === loginIdRaw.toLowerCase()))
@@ -261,15 +281,12 @@
         return;
       }
 
-      // Save current logged-in user info in localStorage
       localStorage.setItem('currentUser', JSON.stringify(user));
 
-      // Successful login
       loginMessage.textContent = 'Login successful! Redirecting...';
       loginMessage.classList.remove('error');
       loginMessage.classList.add('success');
 
-      // Redirect after short delay
       setTimeout(() => {
         window.location.href = "choose-department.html";
       }, 1200);
@@ -277,7 +294,6 @@
 
     function signup(event) {
       event.preventDefault();
-
       const fullName = document.getElementById('fullName').value.trim();
       const matricNoInput = document.getElementById('matricNo');
       const matricNo = matricNoInput.style.display !== 'none' ? matricNoInput.value.trim() : '';
@@ -288,7 +304,6 @@
       signupMessage.textContent = '';
       signupMessage.className = 'message';
 
-      // Validation
       if (!fullName || !password) {
         signupMessage.textContent = 'Please fill in all required fields.';
         signupMessage.classList.add('error');
@@ -302,20 +317,17 @@
 
       let users = getUsers();
 
-      // Check duplicates
       if (signupRole === 'student') {
         if (users.some(u => u.matricNo === matricNo)) {
-          signupMessage.textContent = 'Matric No (Student ID) already registered.';
+          signupMessage.textContent = 'Matric No already registered.';
           signupMessage.classList.add('error');
           return;
         }
       }
-      if (email) {
-        if (users.some(u => u.email && u.email.toLowerCase() === email.toLowerCase())) {
-          signupMessage.textContent = 'Email already registered.';
-          signupMessage.classList.add('error');
-          return;
-        }
+      if (email && users.some(u => u.email && u.email.toLowerCase() === email.toLowerCase())) {
+        signupMessage.textContent = 'Email already registered.';
+        signupMessage.classList.add('error');
+        return;
       }
       if (signupRole === 'lecturer') {
         if (users.some(u => u.role === 'lecturer' && u.fullName.toLowerCase() === fullName.toLowerCase())) {
@@ -325,13 +337,7 @@
         }
       }
 
-      // Save new user
-      const newUser = {
-        fullName,
-        password,
-        email,
-        role: signupRole
-      };
+      const newUser = { fullName, password, email, role: signupRole };
       if (signupRole === 'student') newUser.matricNo = matricNo;
 
       users.push(newUser);
@@ -341,25 +347,32 @@
       signupMessage.classList.remove('error');
       signupMessage.classList.add('success');
 
-      // Reset form
       event.target.reset();
 
-      // Switch to login form after a short delay so user can see success message
       setTimeout(() => {
         toggleForms();
         signupMessage.textContent = '';
       }, 1800);
     }
 
-    // Initialize form role states on page load
+    // Typing effect for welcome text
+    const text = "Welcome to Lecture Link";
+    let i = 0;
+    function typeWriter() {
+      if (i < text.length) {
+        document.getElementById("welcomeText").textContent += text.charAt(i);
+        i++;
+        setTimeout(typeWriter, 100);
+      }
+    }
+
     window.onload = () => {
       setLoginRole('student');
       setSignupRole('student');
       document.getElementById('signupForm').style.display = 'none';
       document.getElementById('loginForm').style.display = 'block';
+      typeWriter();
     };
   </script>
-
 </body>
 </html>
-
