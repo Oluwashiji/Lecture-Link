@@ -1,97 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>View Course Content – Lemon Chase</title>
-  <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f4f6fc; margin: 0; }
-    header { background: #182848; color: #fff; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
-    .logout-btn { background: #4b6cb7; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
-    .container { padding: 2rem; max-width: 600px; margin: auto; }
-    h2 { margin-top: 0; }
-    input[type="text"] {
-      width: 100%; padding: 0.5rem; font-size: 1rem; margin-bottom: 1rem; border-radius: 6px; border: 1px solid #ccc;
-    }
-    .results { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    .result-item { padding: 0.5rem 0; border-bottom: 1px solid #eee; }
-    .no-results { color: #888; font-style: italic; }
-    button.back-btn {
-      background: #4b6cb7; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-bottom: 1rem;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Available Course Materials</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #0d1117;
+    color: #f0f0f0;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Watermark background */
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgba(0, 119, 255, 0.08) 0,
+      rgba(0, 119, 255, 0.08) 1px,
+      transparent 1px,
+      transparent 80px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(0, 119, 255, 0.08) 0,
+      rgba(0, 119, 255, 0.08) 1px,
+      transparent 1px,
+      transparent 80px
+    );
+    z-index: 0;
+  }
+
+  body::after {
+    content: "Lecture Link Lecture Link Lecture Link Lecture Link Lecture Link Lecture Link Lecture Link Lecture Link";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    font-size: 3rem;
+    font-weight: bold;
+    color: rgba(0, 119, 255, 0.07);
+    line-height: 4rem;
+    white-space: pre;
+    transform: rotate(-30deg);
+    z-index: 0;
+  }
+
+  h1 {
+    text-align: center;
+    color: #fff;
+    margin-top: 20px;
+    z-index: 1;
+    position: relative;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    max-width: 600px;
+    margin: 20px auto;
+    z-index: 1;
+    position: relative;
+  }
+
+  li {
+    background: rgba(0,0,0,0.85);
+    margin: 8px 0;
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+
+  a {
+    text-decoration: none;
+    color: #4fc3f7;
+    font-weight: bold;
+  }
+
+  a:hover {
+    text-decoration: underline;
+    color: #81d4fa;
+  }
+
+  #paginationControls {
+    text-align: center;
+    margin-top: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  #paginationControls button {
+    background: #4fc3f7;
+    color: #2c2c3e;
+    border: none;
+    padding: 6px 12px;
+    margin: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  #paginationControls button:hover {
+    background: #81d4fa;
+  }
+
+  #paginationControls button.active {
+    background: #ffffff;
+    color: #2c2c3e;
+  }
+</style>
 </head>
 <body>
-  <header>
-    <h1 id="pageTitle">View Course Content</h1>
-    <button class="logout-btn" onclick="logout()">Logout</button>
-  </header>
+<h1>Available Course Materials</h1>
+<ul id="fileList">
+  <li>Loading files...</li>
+</ul>
+<div id="paginationControls"></div>
 
-  <div class="container">
-    <button class="back-btn" onclick="goBack()">← Back to Levels</button>
-    <h2 id="deptLevelTitle"></h2>
-    <input type="text" id="searchInput" placeholder="Type course name to search..." oninput="searchCourses()" autofocus />
-    <div class="results" id="results"></div>
-  </div>
+<script>
+(async function() {
+  const listEl = document.getElementById('fileList');
+  const paginationEl = document.getElementById('paginationControls');
+  const API_BASE = 'http://localhost:3000';
+  const itemsPerPage = 5; // show 5 files per page
+  let currentPage = 1;
+  let files = [];
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const deptKey = params.get('dept');
-    const level = params.get('level');
+  function showError(msg) {
+    listEl.innerHTML = '<li>' + msg + '</li>';
+  }
 
-    const deptNames = {
-      ComputerScience: "Computer Science",
-      SoftwareEngineering: "Software Engineering",
-      InformationSystems: "Information Systems"
-    };
-
-    document.getElementById('deptLevelTitle').textContent = `${deptNames[deptKey] || 'Department'} – ${level || ''}`;
-
-    let courses = [];
-
-    // Fetch courses from backend on page load
-    async function fetchCourses() {
-      try {
-        const response = await fetch(`/api/getCourses?dept=${encodeURIComponent(deptKey)}&level=${encodeURIComponent(level)}`);
-        if (!response.ok) throw new Error('Failed to fetch courses');
-        courses = await response.json();
-        displayCourses(courses);
-      } catch (error) {
-        document.getElementById('results').innerHTML = `<p class="no-results">Error loading courses: ${error.message}</p>`;
-      }
+  function renderPage(page) {
+    listEl.innerHTML = '';
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageItems = files.slice(start, end);
+    if(pageItems.length === 0) {
+      listEl.innerHTML = '<li>No files to display.</li>';
+      return;
     }
+    pageItems.forEach(f => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = API_BASE + f.url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = f.name;
+      li.appendChild(a);
+      listEl.appendChild(li);
+    });
+    renderPaginationControls();
+  }
 
-    // Display all courses initially or filtered
-    function displayCourses(courseList) {
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = '';
-      if (!courseList.length) {
-        resultsDiv.innerHTML = '<p class="no-results">No courses found.</p>';
-        return;
-      }
-      courseList.forEach(course => {
-        const div = document.createElement('div');
-        div.className = 'result-item';
-        div.textContent = course;
-        resultsDiv.appendChild(div);
+  function renderPaginationControls() {
+    paginationEl.innerHTML = '';
+    const totalPages = Math.ceil(files.length / itemsPerPage);
+    if(totalPages <= 1) return;
+
+    for(let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = i;
+      if(i === currentPage) btn.classList.add('active');
+      btn.addEventListener('click', () => {
+        currentPage = i;
+        renderPage(currentPage);
       });
+      paginationEl.appendChild(btn);
+    }
+  }
+
+  try {
+    const res = await fetch(API_BASE + '/files');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    files = await res.json();
+
+    if (!files || files.length === 0) {
+      showError('No files found.');
+      return;
     }
 
-    function searchCourses() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = courses.filter(c => c.toLowerCase().includes(query));
-      displayCourses(filtered);
-    }
-
-    function logout() {
-      window.location.href = 'login.html';
-    }
-
-    function goBack() {
-      window.location.href = `levels.html?dept=${deptKey}`;
-    }
-
-    fetchCourses();
-  </script>
+    renderPage(currentPage);
+  } catch (err) {
+    console.error(err);
+    showError('Error fetching files');
+  }
+})();
+</script>
 </body>
 </html>
+
