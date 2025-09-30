@@ -1,16 +1,26 @@
- const express = require('express');
+   const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // Use Render’s port
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve uploads folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Serve static frontend files (HTML, CSS, JS) from root
+app.use(express.static(path.join(__dirname)));
+
+// Serve index.html at root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // Multer setup
 const storage = multer.diskStorage({
@@ -36,7 +46,6 @@ app.post('/upload', upload.single('file'), (req, res) => {
     return res.status(400).json({ error: 'No file uploaded.' });
   }
 
-  // Read metadata.json
   const metaPath = path.join(__dirname, 'uploads', 'metadata.json');
   let metadata = [];
   try {
@@ -48,7 +57,6 @@ app.post('/upload', upload.single('file'), (req, res) => {
     return res.status(500).json({ error: 'Server error reading metadata.' });
   }
 
-  // Save new entry
   const { title, dept, level } = req.body;
   const newEntry = {
     title,
@@ -80,4 +88,5 @@ app.get('/files', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
-  
+
+
