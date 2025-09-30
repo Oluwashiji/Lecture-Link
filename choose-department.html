@@ -3,18 +3,119 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Choose Department – Lemon Chase</title>
+  <title>Choose Department – Lecture Link</title>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f4f6fc; margin:0; }
-    header { background:#182848; color:#fff; padding:1rem; text-align:center;}
-    .container { padding:2rem; max-width:400px; margin:2rem auto; background:#fff; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-    select, button { width:100%; padding:0.8rem; font-size:1rem; margin:1rem 0; border-radius:6px; border:1px solid #ccc;}
-    button { background:#182848; color:#fff; border:none; cursor:pointer;}
-    button:hover { background:#39548a;}
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #0d1117;
+      color: white;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Full repeating watermark background */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: repeating-linear-gradient(
+        45deg,
+        rgba(0, 119, 255, 0.08) 0,
+        rgba(0, 119, 255, 0.08) 1px,
+        transparent 1px,
+        transparent 80px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        rgba(0, 119, 255, 0.08) 0,
+        rgba(0, 119, 255, 0.08) 1px,
+        transparent 1px,
+        transparent 80px
+      );
+      z-index: 0;
+    }
+
+    /* Overlay text pattern */
+    body::after {
+      content: "Lecture Link Lecture Link Lecture Link Lecture Link Lecture Link Lecture Link Lecture Link Lecture Link";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      font-size: 3rem;
+      font-weight: bold;
+      color: rgba(0, 119, 255, 0.07);
+      line-height: 4rem;
+      white-space: pre;
+      transform: rotate(-30deg);
+      z-index: 0;
+    }
+
+    header {
+      background: rgba(24, 40, 72, 0.9);
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+      z-index: 1;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    .container {
+      padding: 2rem;
+      max-width: 400px;
+      margin: 2rem auto;
+      background: rgba(24, 40, 72, 0.9);
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+      z-index: 1;
+      position: relative;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1rem;
+      margin: 1rem 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    select {
+      background: #fff;
+      color: #182848;
+    }
+
+    button {
+      background: #0077ff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #005fcc;
+    }
   </style>
 </head>
 <body>
-  <header><h1 id="welcomeHeader">Welcome to Lemon Chase</h1></header>
+  <header><h1 id="welcomeHeader">Welcome to Lecture Link</h1></header>
   <div class="container">
     <h2>Select Your Department</h2>
     <select id="dept">
@@ -24,28 +125,23 @@
       <option value="InformationSystems">Information Systems</option>
       <option value="ComputerScienceEducation">Computer Science Education</option>
       <option value="CyberSecurity">Cyber Security</option>
-      <!-- Add more as needed -->
     </select>
     <button onclick="goLevels()">Continue</button>
   </div>
 
   <script>
-    // Change header if logged in user is lecturer
     window.onload = function() {
       const currentUserJSON = localStorage.getItem('currentUser');
       if (!currentUserJSON) return;
-
       const currentUser = JSON.parse(currentUserJSON);
       if (currentUser.role === 'lecturer') {
-        const header = document.getElementById('welcomeHeader');
-        header.textContent = `Welcome, ${currentUser.fullName}!`;
+        document.getElementById('welcomeHeader').textContent = `Welcome, ${currentUser.fullName}!`;
       }
     };
 
     function goLevels() {
       const dept = document.getElementById("dept").value;
       if (!dept) return alert("Please choose a department.");
-      // pass dept via query string
       window.location.href = `levels.html?dept=${dept}`;
     }
   </script>
