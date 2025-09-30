@@ -1,69 +1,83 @@
-    require('dotenv').config();
-const express = require('express');
+ const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
-
-// Serve all static files in the root folder
-app.use(express.static(path.join(__dirname)));
-
-// Serve uploaded files
+app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Multer setup for uploads
+// Multer setup
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g, '_')),
+  destination: (req, file, cb) => {
+    cb(null, './uploads');
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = Date.now() + '-' + file.originalname;
+    cb(null, uniqueName);
+  }
 });
 const upload = multer({ storage });
 
-// Upload route
+// Upload endpoint with role check
 app.post('/upload', upload.single('file'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const user = req.body.user ? JSON.parse(req.body.user) : null;
 
-  res.json({
-    message: 'File uploaded successfully!',
-    filename: req.file.filename,
-    url: `/uploads/${req.file.filename}`,
-  });
+  if (!user || user.role !== 'lecturer') {
+    return res.status(403).json({ error: 'Only lecturers can upload files.' });
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded.' });
+  }
+
+  // Read metadata.json
+  const metaPath = path.join(__dirname, 'uploads', 'metadata.json');
+  let metadata = [];
+  try {
+    if (fs.existsSync(metaPath)) {
+      metadata = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
+    }
+  } catch (err) {
+    console.error('Error reading metadata:', err);
+    return res.status(500).json({ error: 'Server error reading metadata.' });
+  }
+
+  // Save new entry
+  const { title, dept, level } = req.body;
+  const newEntry = {
+    title,
+    dept,
+    level,
+    filename: req.file.filename
+  };
+  metadata.push(newEntry);
+
+  fs.writeFileSync(metaPath, JSON.stringify(metadata, null, 2));
+
+  res.json({ message: 'Upload successful', filename: req.file.filename });
 });
 
-// List files route
+// Get files
 app.get('/files', (req, res) => {
-  const uploadsDir = path.join(__dirname, 'uploads');
-  fs.readdir(uploadsDir, (err, files) => {
-    if (err) return res.status(500).json({ error: 'Error reading uploads folder' });
-
-    const allowedExtensions = ['.pdf', '.docx'];
-    const filteredFiles = files
-      .filter(file => allowedExtensions.includes(path.extname(file).toLowerCase()))
-      .map(file => ({ name: file, url: `/uploads/${file}` }));
-
-    res.json(filteredFiles);
-  });
+  const metaPath = path.join(__dirname, 'uploads', 'metadata.json');
+  let metadata = [];
+  try {
+    if (fs.existsSync(metaPath)) {
+      metadata = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
+    }
+  } catch (err) {
+    console.error('Error reading metadata:', err);
+  }
+  res.json(metadata);
 });
 
-// Serve any HTML file in the root folder
-app.get('/:htmlFile', (req, res, next) => {
-  const fileName = req.params.htmlFile;
-  const filePath = path.join(__dirname, fileName);
-  if (fs.existsSync(filePath)) return res.sendFile(filePath);
-  next(); // If file doesn't exist, move to 404
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).send('Page not found');
-});
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+  
