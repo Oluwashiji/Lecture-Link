@@ -9,7 +9,7 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       background-color: #0d1117;
@@ -44,7 +44,7 @@
     }
 
     body::after {
-      content: "Lecture Link Lecture Link Lecture Link Lecture Link Lecture Link Lecture Link Lecture Link Lecture Link";
+      content: "Lecture Link Lecture Link Lecture Link Lecture Link";
       position: absolute;
       top: -50%;
       left: -50%;
@@ -71,7 +71,7 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
 
-    .back-btn, .logout-btn {
+    .logout-btn {
       background: #0077ff;
       color: #fff;
       border: none;
@@ -82,7 +82,7 @@
       transition: background 0.3s ease;
     }
 
-    .back-btn:hover, .logout-btn:hover {
+    .logout-btn:hover {
       background: #005fcc;
     }
 
@@ -90,6 +90,7 @@
       padding: 2rem;
       z-index: 1;
       position: relative;
+      flex: 1;
     }
 
     .levels-list {
@@ -133,6 +134,30 @@
     .options button:hover {
       background: #39548a;
     }
+
+    /* ✅ Mobile responsiveness */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .levels-list {
+        width: 100%;
+        padding: 0 1rem;
+      }
+
+      .options button {
+        display: block;
+        margin: 0.5rem 0;
+        width: 100%;
+      }
+
+      .logout-btn {
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -153,7 +178,7 @@
     const deptNames = {
       ComputerScience: "Computer Science",
       SoftwareEngineering: "Software Engineering",
-      InformationSystems: "Information Systems" ,
+      InformationSystems: "Information Systems",
       ComputerScienceEducation: "Computer Science Education",
       CyberSecurity: "Cyber Security"
     };
@@ -183,6 +208,7 @@
       window.location.href = `upload.html?dept=${encodeURIComponent(deptKey)}&level=${encodeURIComponent(level)}`;
     }
     function logout() {
+      // ✅ Always redirect to login
       window.location.href = "login.html";
     }
   </script>
